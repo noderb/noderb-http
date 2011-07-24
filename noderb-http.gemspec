@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
   
-  s.name        = "noderb_http"
+  s.name        = "noderb-http"
   s.version     = "0.0.1"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Marek Jelen"]
   s.email       = ["marek@jelen.biz"]
-  s.homepage    = "http://github.com/noderb/noderb_http"
+  s.homepage    = "http://github.com/noderb/noderb-http"
   s.summary     = "Fast and full-featured HTTP parser"
   s.description = "Fast and full-featured HTTP parser."
 

@@ -6,20 +6,20 @@ typedef struct {
 
 VALUE nodeRbHttpParser;
 
-VALUE nodeRb_get_class_from_id(long id) {
+VALUE nodeRb_get_object_from_id(long id) {
     return rb_funcall(rb_const_get(rb_cObject, rb_intern("ObjectSpace")), rb_intern("_id2ref"), 1, rb_int2inum(id));
 }
 
 int nodeRb_http_on_message_begin(http_parser* parser) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
     rb_funcall(self, rb_intern("on_message_begin"), 0);
     return 0;
 }
 
 int nodeRb_http_on_message_complete(http_parser* parser) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
     if (http_should_keep_alive(parser)) {
         rb_funcall(self, rb_intern("on_close_keep_alive"), 0);
     };
@@ -29,28 +29,28 @@ int nodeRb_http_on_message_complete(http_parser* parser) {
 
 int nodeRb_http_on_headers_complete(http_parser* parser) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_headers_complete"), 0);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
+    rb_funcall(self, rb_intern("on_headers_complete_internal"), 0);
     return 0;
 }
 
 int nodeRb_http_on_header_field(http_parser* parser, const char *buf, size_t len) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_header_field"), 1, rb_str_new(buf, len));
+    VALUE self = nodeRb_get_object_from_id(client->parser);
+    rb_funcall(self, rb_intern("on_header_field_internal"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_header_value(http_parser* parser, const char *buf, size_t len) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_header_value"), 1, rb_str_new(buf, len));
+    VALUE self = nodeRb_get_object_from_id(client->parser);
+    rb_funcall(self, rb_intern("on_header_value_internal"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_path(http_parser* parser, const char *buf, size_t len) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
     rb_funcall(self, rb_intern("on_method"), 1, rb_str_new2(http_method_str(parser->method)));
     rb_funcall(self, rb_intern("on_path"), 1, rb_str_new(buf, len));
     return 0;
@@ -58,28 +58,28 @@ int nodeRb_http_on_path(http_parser* parser, const char *buf, size_t len) {
 
 int nodeRb_http_on_query_string(http_parser* parser, const char *buf, size_t len) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
     rb_funcall(self, rb_intern("on_query_string"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_url(http_parser* parser, const char *buf, size_t len) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
     rb_funcall(self, rb_intern("on_url"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_fragment(http_parser* parser, const char *buf, size_t len) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
     rb_funcall(self, rb_intern("on_fragment"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_body(http_parser* parser, const char *buf, size_t len) {
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_class_from_id(client->parser);
+    VALUE self = nodeRb_get_object_from_id(client->parser);
     rb_funcall(self, rb_intern("on_body"), 1, rb_str_new(buf, len));
     return 0;
 }
