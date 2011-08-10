@@ -1,9 +1,9 @@
-require File.expand_path("../lib/noderb")
+require File.expand_path("../lib/noderb/modules/http/version", __FILE__)
 
 Gem::Specification.new do |s|
   
   s.name        = "noderb-http"
-  s.version     = NodeRb::Modules::Http::Version
+  s.version     = NodeRb::Modules::Http::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Marek Jelen"]
   s.email       = ["marek@jelen.biz"]
