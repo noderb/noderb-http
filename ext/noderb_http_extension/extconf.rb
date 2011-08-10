@@ -1,3 +1,3 @@
 require "mkmf"
 
-create_makefile("noderb_http")
+create_makefile("noderb_http_extension")

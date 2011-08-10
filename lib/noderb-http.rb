@@ -1,2 +1,2 @@
-require 'noderb_http_extension/noderb_http'
-require "noderb/modules/http"
+require 'noderb_http_extension'
+require 'noderb/modules/http'

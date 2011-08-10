@@ -1,7 +1,9 @@
+require File.expand_path("../lib/noderb")
+
 Gem::Specification.new do |s|
   
   s.name        = "noderb-http"
-  s.version     = "0.0.1"
+  s.version     = NodeRb::Modules::Http::Version
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Marek Jelen"]
   s.email       = ["marek@jelen.biz"]
@@ -13,8 +15,8 @@ Gem::Specification.new do |s|
 
   s.extensions << 'ext/noderb_http_extension/extconf.rb'
 
-  s.files        = Dir.glob("{bin,lib,ext}/**/*") + %w(LICENSE README.md)
+  s.files        = Dir.glob("{bin,lib,ext,test}/**/*") + %w(LICENSE README.md)
 
-  s.require_paths = ['lib', 'ext']
+  s.require_paths = ['lib']
   
 end
