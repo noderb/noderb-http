@@ -1,73 +1,69 @@
 #include <noderb_http.h>
 
 typedef struct {
-    long parser;
+    VALUE parser;
     int pre_headers;
 } nodeRb_http;
 
 VALUE nodeRbHttpParser;
 VALUE nodeRbHttpPointer;
 
-VALUE nodeRb_get_object_from_id(long id) {
-    return rb_funcall(rb_const_get(rb_cObject, rb_intern("ObjectSpace")), rb_intern("_id2ref"), 1, rb_int2inum(id));
-}
-
 int nodeRb_http_on_message_begin(http_parser* parser) {
+    printf("-- Message begin \n");
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_object_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_message_begin"), 0);
+    rb_funcall(client->parser, rb_intern("on_message_begin"), 0);
     return 0;
 }
 
 int nodeRb_http_on_url(http_parser* parser, const char *buf, size_t len) {
+    printf("-- Url \n");
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_object_from_id(client->parser);
     if(parser->type == HTTP_REQUEST){
-        rb_funcall(self, rb_intern("on_method"), 1, rb_str_new2(http_method_str(parser->method)));
+        rb_funcall(client->parser, rb_intern("on_method"), 1, rb_str_new2(http_method_str(parser->method)));
     }
-    rb_funcall(self, rb_intern("on_url"), 1, rb_str_new(buf, len));
+    rb_funcall(client->parser, rb_intern("on_url"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_header_field(http_parser* parser, const char *buf, size_t len) {
+    printf("-- Headers field \n");
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_object_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_header_field"), 1, rb_str_new(buf, len));
+    rb_funcall(client->parser, rb_intern("on_header_field"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_header_value(http_parser* parser, const char *buf, size_t len) {
+    printf("-- Headers value %s \n", buf);
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_object_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_header_value"), 1, rb_str_new(buf, len));
+    rb_funcall(client->parser, rb_intern("on_header_value"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_headers_complete(http_parser* parser) {
+    printf("-- Headers complete \n");
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_object_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_version"), 2, rb_int2inum(parser->http_major), rb_int2inum(parser->http_minor));
+    rb_funcall(client->parser, rb_intern("on_version"), 2, rb_int2inum(parser->http_major), rb_int2inum(parser->http_minor));
     if(parser->type == HTTP_RESPONSE){
-        rb_funcall(self, rb_intern("on_status_code"), 1, rb_int2inum(parser->status_code));
+        rb_funcall(client->parser, rb_intern("on_status_code"), 1, rb_int2inum(parser->status_code));
     }
     if (http_should_keep_alive(parser)) {       
-        rb_funcall(self, rb_intern("on_keep_alive"), 1, Qtrue);
+        rb_funcall(client->parser, rb_intern("on_keep_alive"), 1, Qtrue);
     }
-    rb_funcall(self, rb_intern("on_headers_complete"), 0);
+    rb_funcall(client->parser, rb_intern("on_headers_complete"), 0);
     return 0;
 }
 
 int nodeRb_http_on_body(http_parser* parser, const char *buf, size_t len) {
+    printf("-- Body \n");
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_object_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_body"), 1, rb_str_new(buf, len));
+    rb_funcall(client->parser, rb_intern("on_body"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_message_complete(http_parser* parser) {
+    printf("-- Message complete \n");
     nodeRb_http* client = parser->data;
-    VALUE self = nodeRb_get_object_from_id(client->parser);
-    rb_funcall(self, rb_intern("on_message_complete"), 0);
+    rb_funcall(client->parser, rb_intern("on_message_complete"), 0);
     return 0;
 }
 
@@ -96,9 +92,8 @@ VALUE nodeRb_http_setup(VALUE self, VALUE type) {
     }   
 
     nodeRb_http* client = malloc(sizeof (nodeRb_http));
+    client->parser = self;
     parser->data = client;
-
-    client->parser = rb_num2long(rb_obj_id(self));
 
     rb_iv_set(self, "@settings", Data_Wrap_Struct(nodeRbHttpPointer, 0, NULL, settings));
     rb_iv_set(self, "@parser", Data_Wrap_Struct(nodeRbHttpPointer, 0, NULL, parser));
@@ -106,6 +101,8 @@ VALUE nodeRb_http_setup(VALUE self, VALUE type) {
 
 VALUE nodeRb_http_parse(VALUE self, VALUE data) {
 
+    printf("-- Parse %s \n", rb_string_value_cstr(&data));
+    
     http_parser_settings* settings;
     http_parser* parser;
 
@@ -115,8 +112,6 @@ VALUE nodeRb_http_parse(VALUE self, VALUE data) {
 
     Data_Get_Struct(rsettings, http_parser_settings, settings);
     Data_Get_Struct(rparser, http_parser, parser);
-
-    nodeRb_http* client = parser->data;
 
     size_t parsed = http_parser_execute(parser, settings, rb_string_value_cstr(&data), RSTRING_LEN(data));
 

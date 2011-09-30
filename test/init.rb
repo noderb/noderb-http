@@ -4,7 +4,7 @@ $: << File.expand_path("../../lib", __FILE__)
 require "noderb-http"
 
 class TestParser
-  
+
   include NodeRb::Modules::Http::Parser
   
   attr_accessor :headers, :version_major, :version_minor, :method, :url, :body, :keep_alive, :upgrade
@@ -41,6 +41,7 @@ Dir.glob(File.expand_path("../cases/*.rb", __FILE__)) do |file|
     require file
 end
 
+puts "** Testing noderb-http"
 failed = false
 CASES.each do |test|
   parser = TestParser.new

@@ -3,3 +3,4 @@ noderb_http.iml
 ext/noderb_http_extension/Makefile
 ext/noderb_http_extension/noderb_http_extension.bundle
 *.gem
+*.rbc
