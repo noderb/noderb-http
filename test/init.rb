@@ -58,6 +58,7 @@ CASES.each do |test|
     puts "** Test <#{test[:name]}> failed on #{result}" if result != "OK"
     failed = true
   end
+  parser.dispose
 end
 
 puts "** All test passed OK" unless failed

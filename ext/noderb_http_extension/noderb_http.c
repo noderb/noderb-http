@@ -9,14 +9,12 @@ VALUE nodeRbHttpParser;
 VALUE nodeRbHttpPointer;
 
 int nodeRb_http_on_message_begin(http_parser* parser) {
-    printf("-- Message begin \n");
     nodeRb_http* client = parser->data;
     rb_funcall(client->parser, rb_intern("on_message_begin"), 0);
     return 0;
 }
 
 int nodeRb_http_on_url(http_parser* parser, const char *buf, size_t len) {
-    printf("-- Url \n");
     nodeRb_http* client = parser->data;
     if(parser->type == HTTP_REQUEST){
         rb_funcall(client->parser, rb_intern("on_method"), 1, rb_str_new2(http_method_str(parser->method)));
@@ -26,21 +24,18 @@ int nodeRb_http_on_url(http_parser* parser, const char *buf, size_t len) {
 }
 
 int nodeRb_http_on_header_field(http_parser* parser, const char *buf, size_t len) {
-    printf("-- Headers field \n");
     nodeRb_http* client = parser->data;
     rb_funcall(client->parser, rb_intern("on_header_field"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_header_value(http_parser* parser, const char *buf, size_t len) {
-    printf("-- Headers value %s \n", buf);
     nodeRb_http* client = parser->data;
     rb_funcall(client->parser, rb_intern("on_header_value"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_headers_complete(http_parser* parser) {
-    printf("-- Headers complete \n");
     nodeRb_http* client = parser->data;
     rb_funcall(client->parser, rb_intern("on_version"), 2, rb_int2inum(parser->http_major), rb_int2inum(parser->http_minor));
     if(parser->type == HTTP_RESPONSE){
@@ -54,14 +49,12 @@ int nodeRb_http_on_headers_complete(http_parser* parser) {
 }
 
 int nodeRb_http_on_body(http_parser* parser, const char *buf, size_t len) {
-    printf("-- Body \n");
     nodeRb_http* client = parser->data;
     rb_funcall(client->parser, rb_intern("on_body"), 1, rb_str_new(buf, len));
     return 0;
 }
 
 int nodeRb_http_on_message_complete(http_parser* parser) {
-    printf("-- Message complete \n");
     nodeRb_http* client = parser->data;
     rb_funcall(client->parser, rb_intern("on_message_complete"), 0);
     return 0;
@@ -95,20 +88,19 @@ VALUE nodeRb_http_setup(VALUE self, VALUE type) {
     client->parser = self;
     parser->data = client;
 
-    rb_iv_set(self, "@settings", Data_Wrap_Struct(nodeRbHttpPointer, 0, NULL, settings));
-    rb_iv_set(self, "@parser", Data_Wrap_Struct(nodeRbHttpPointer, 0, NULL, parser));
+    rb_iv_set(self, "settings", Data_Wrap_Struct(nodeRbHttpPointer, 0, NULL, settings));
+    rb_iv_set(self, "parser", Data_Wrap_Struct(nodeRbHttpPointer, 0, NULL, parser));
+    
+    return self;
 };
 
 VALUE nodeRb_http_parse(VALUE self, VALUE data) {
 
-    printf("-- Parse %s \n", rb_string_value_cstr(&data));
-    
     http_parser_settings* settings;
     http_parser* parser;
 
-    VALUE rsettings = rb_iv_get(self, "@settings");
-    VALUE rparser = rb_iv_get(self, "@parser");
-
+    VALUE rsettings = rb_iv_get(self, "settings");
+    VALUE rparser = rb_iv_get(self, "parser");
 
     Data_Get_Struct(rsettings, http_parser_settings, settings);
     Data_Get_Struct(rparser, http_parser, parser);
@@ -120,18 +112,21 @@ VALUE nodeRb_http_parse(VALUE self, VALUE data) {
     } else if (parsed != (unsigned) RSTRING_LEN(data)) {
         rb_funcall(self, rb_intern("on_error"), 2, rb_str_new2(http_errno_name(parser->http_errno)), rb_str_new2(http_errno_description(parser->http_errno)));
     };
+
+    return self;
 };
 
 VALUE nodeRb_http_dispose(VALUE self) {
     http_parser_settings* settings;
     http_parser* parser;
 
-    Data_Get_Struct(rb_iv_get(self, "@settings"), http_parser_settings, settings);
-    Data_Get_Struct(rb_iv_get(self, "@parser"), http_parser, parser);
+    Data_Get_Struct(rb_iv_get(self, "settings"), http_parser_settings, settings);
+    Data_Get_Struct(rb_iv_get(self, "parser"), http_parser, parser);
 
     free(parser->data);
     free(settings);
     free(parser);
+    return self;
 };
 
 void Init_noderb_http_extension() {
