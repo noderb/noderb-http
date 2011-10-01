@@ -15,6 +15,8 @@ Gem::Specification.new do |s|
 
   s.extensions << 'ext/noderb_http_extension/extconf.rb'
 
+  s.add_dependency('rack', '>= 1.1.0')
+
   s.files        = Dir.glob("{bin,lib,ext,test}/**/*") + %w(LICENSE README.md)
 
   s.require_paths = ['lib']
